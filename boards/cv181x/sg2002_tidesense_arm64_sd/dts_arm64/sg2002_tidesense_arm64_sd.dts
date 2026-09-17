@@ -35,6 +35,14 @@
 &spi2 {
 	status = "okay";
 	num-cs = <1>;
+
+	imu@0 {
+		compatible = "silan,sc7u22";
+		reg = <0>;
+		spi-max-frequency = <10000000>;
+		spi-cpol;
+		spi-cpha;
+	};
 };
 
 &spi3 {

@@ -42,5 +42,5 @@ sync
 
 - `pin.md` 未给出 DRAM 容量。当前 `memmap.py` 沿用 SDK SG2002 ARM64 参考板的 256 MiB 地址布局；如果 TideSense 实物 DRAM 容量不同，必须同步修改此内存图及 DDR 初始化配置。
 - ISP tuning 仍使用 SDK 默认值；产品成像质量需要后续标定。共享 FSIN 的双路同步配置已接入 CVITEK `hw_sync` 开关，但脉冲极性、相位和上板同步效果仍需实测。
-- 源码中仍没有 SC7U22 驱动；IMU 运行需要单独加入对应 SPI 驱动。
+- SC7U22：已添加 SPI2 子设备及 spidev 支持，SDK 根目录的 `scripts/sc7u22/run.sh` 可进行用户态六轴/FIFO 测试。1 MHz 与 5 MHz 的上板测试通过，10 MHz 出现异常数据，默认使用 1 MHz；尚未接入正式 IIO 驱动或验证 IMU 中断。
 - 原理图中 USB_VBUS_DET 固定接 1.8 V；板级初始化不把该脚改作 GPIO。`pin.md` 还标明 Type-C 的 CC1/CC2 未连接；请确认板上有适合设备模式的 Rd 电阻。否则 Type-C 对 Type-C 连接可能无法完成 attach，需用实际线缆验证。
