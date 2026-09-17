@@ -36,6 +36,7 @@ sync
 - OV9281：CVITEK sensor adapter 已加入，默认双路为 1280×800 RAW10 60fps。编译启用 `CONFIG_SENSOR_OV_OV9281=y`。SDK sample 从 `/mnt/data/sensor_cfg.ini` 读取双目配置；本目录的 `sensor_cfg.ini` 可复制到 SD 卡 DATA 分区的根目录。左侧 U4 的 7-bit I²C 地址为 `0x10`（配置写十进制 `16`），右侧 U12 为 `0x60`（十进制 `96`）。CVITEK 的 `lane_id` 顺序为 CLK/D0/D1/D2/D3：左侧 RX0 使用 `0,1,2,-1,-1`（2 lane），右侧 RX1 使用 `3,4,-1,-1,-1`（1 lane）。适配层按各路 RX 配置选择传感器输出 lane 数，详情见 [OV9281 双目配置核查](OV9281-lanes.md)；`hw_sync=1` 会设置 OV9281 外部 VSYNC 输入，实际 FSIN 脉冲需为 60 Hz。
 - USB RNDIS：启动时在 USB1 Type-C 上启用 USB gadget 网卡，设备端地址固定为 `192.168.123.99/24`。主机设置为 `192.168.123.x/24`，例如 `192.168.123.100/24`。启用项为 `CONFIG_TARGET_PACKAGE_RNDIS_SCRIPT=y`。
 - IMU：SPI2 走 `SD1_D3/D0/CMD/CLK`，中断走 `SD1_D1`；未连接的 `SD1_D2` 保持为 GPIO。
+- perf：已启用 A53 PMU 硬件计数器和采样支持；运行 SDK 根目录的 `scripts/perf/build.sh` 构建工具，详见 `scripts/perf/README.md`。更换此内核时须同时更新匹配的内核与厂商 `.ko` 模块。
 - 不配置 SPI NOR、SPI NAND、eMMC 或 MTD 闪存。Linux/U-Boot 的通用 SPI 控制器仍保留给 SPI2 IMU 总线。
 
 ## 尚需按实物确认

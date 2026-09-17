@@ -9,6 +9,12 @@
 	/delete-node/ cvi-spif@10000000;
 };
 
+&{/pmu_a53} {
+	/* SG2002 exposes one A53; each PMU SPI needs one affinity entry. */
+	interrupts = <GIC_SPI 119 IRQ_TYPE_LEVEL_HIGH>;
+	interrupt-affinity = <&A53_0>;
+};
+
 &sd {
 	/* SD0_CD is grounded on this board; the TF socket's DET switch is not routed. */
 	/delete-property/ cvi-cd-gpios;
