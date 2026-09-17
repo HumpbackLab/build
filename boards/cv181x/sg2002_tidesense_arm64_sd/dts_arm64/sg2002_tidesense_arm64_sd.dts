@@ -1,0 +1,48 @@
+/dts-v1/;
+#include "cv181x_base_arm.dtsi"
+#include "cv181x_asic_bga.dtsi"
+#include "cv181x_asic_sd.dtsi"
+#include "cv181x_default_memmap.dtsi"
+
+/ {
+	/* This board has no SPI NOR or SPI NAND device. */
+	/delete-node/ cvi-spif@10000000;
+};
+
+&sd {
+	/* SD0_CD is grounded on this board; the TF socket's DET switch is not routed. */
+	/delete-property/ cvi-cd-gpios;
+	no-1-8-v;
+	max-frequency = <25000000>;
+};
+
+&i2c2 {
+	status = "okay";
+	scl-pinmux = <0x030010a8 0x6 0x0>;
+	sda-pinmux = <0x030010ac 0x6 0x0>;
+	scl-gpios = <&porte 1 GPIO_ACTIVE_HIGH>;
+	sda-gpios = <&porte 2 GPIO_ACTIVE_HIGH>;
+};
+
+&spi0 {
+	status = "disabled";
+};
+
+&spi1 {
+	status = "disabled";
+};
+
+&spi2 {
+	status = "okay";
+	num-cs = <1>;
+};
+
+&spi3 {
+	status = "disabled";
+};
+
+&mipi_rx {
+	/* Camera 0 / Camera 1 XSHUTDOWN, on PWR_WAKEUP0 / PWR_BUTTON1. */
+	snsr-reset = <&porte 6 GPIO_ACTIVE_LOW>, <&porte 8 GPIO_ACTIVE_LOW>,
+		     <&porte 6 GPIO_ACTIVE_LOW>;
+};
