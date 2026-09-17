@@ -15,3 +15,10 @@ du -sh $SYSTEM_DIR/* |sort -rh
 
 rm -rf $SYSTEM_DIR/etc/init.d/S23ntp
 rm -rf $SYSTEM_DIR/bin/ntpd
+
+RNDIS_INIT=$SYSTEM_DIR/etc/init.d/S77rndis
+if [ ! -f "$RNDIS_INIT" ]; then
+	echo "Missing RNDIS init script: $RNDIS_INIT"
+	exit 1
+fi
+sed -i 's/ifconfig usb0 169\.254\.250\.73/ifconfig usb0 192.168.123.99 netmask 255.255.255.0/' "$RNDIS_INIT"
