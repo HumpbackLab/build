@@ -1,0 +1,50 @@
+0x00000021
+0x00000000
+0x00000208
+0x00000000
+0x000C0000
+0x00000000
+pipe 0 addr 0x10 receiver clock=0 data=1,2 lanes=2
+pipe 1 addr 0x60 receiver clock=3 data=4,-1 lanes=1
+ViPipe:0, OV9281 addr=0x10 2-lane 1280x800 RAW10 60fps init OK
+pipe 0 reg 0x3039 = 0x32 expected 0x32
+pipe 0 reg 0x303a = 0x00 expected 0x00
+pipe 0 reg 0x030d = 0x50 expected 0x50
+pipe 0 reg 0x3662 = 0x05 expected 0x05
+pipe 0 reg 0x380c = 0x05 expected 0x05
+pipe 0 reg 0x380d = 0xb0 expected 0xb0
+pipe 0 reg 0x380e = 0x03 expected 0x03
+pipe 0 reg 0x380f = 0x8e expected 0x8e
+pipe 0 reg 0x0100 = 0x01 expected 0x01
+ViPipe:1, OV9281 addr=0x60 1-lane 1280x800 RAW10 60fps init OK
+pipe 1 reg 0x3039 = 0x32 expected 0x32
+pipe 1 reg 0x303a = 0x00 expected 0x00
+pipe 1 reg 0x030d = 0x50 expected 0x50
+pipe 1 reg 0x3662 = 0x01 expected 0x01
+pipe 1 reg 0x380c = 0x05 expected 0x05
+pipe 1 reg 0x380d = 0xb0 expected 0xb0
+pipe 1 reg 0x380e = 0x03 expected 0x03
+pipe 1 reg 0x380f = 0x8e expected 0x8e
+pipe 1 reg 0x0100 = 0x01 expected 0x01
+
+Module: [MIPI_RX], Build Time[#2 SMP PREEMPT Thu Sep 17 15:16:21 CST 2026]
+
+------------Combo DEV ATTR--------------
+   Devno  WorkMode  DataType   WDRMode         LinkId        PN Swap  SyncMode  DataEndian  SyncCodeEndian
+       0      MIPI     RAW10      NONE  0, 1, 2,-1,-1  0, 0, 0, 0, 0       N/A         N/A             N/A
+   Devno  WorkMode  DataType   WDRMode         LinkId        PN Swap  SyncMode  DataEndian  SyncCodeEndian
+       1      MIPI     RAW10      NONE  3, 4,-1,-1,-1  0, 0, 0, 0, 0       N/A         N/A             N/A
+
+------------MIPI info-------------------
+ Devno EccErr CrcErr HdrErr WcErr fifofull   decode
+     0      0      0      0     0        0    raw10
+  Physical:       D0       D1       D2       D3       D4       D5
+                   0        0        0        0       ff        0
+   Digital:       D0       D1       D2       D3    CK_HS  CK_ULPS  CK_STOP   CK_ERR   Deskew
+             hs_idle  hs_idle  hs_idle  hs_idle        1        0        0        0     idle
+ Devno EccErr CrcErr HdrErr WcErr fifofull   decode
+     1      0      0      0     0        0    raw10
+  Physical:       D0       D1       D2       D3       D4       D5
+                   0       ff       ff        0       ff        0
+   Digital:       D0       D1       D2       D3    CK_HS  CK_ULPS  CK_STOP   CK_ERR   Deskew
+             hs_idle  hs_idle   hs_hst  hs_idle        0        1        0        0     idle
