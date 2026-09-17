@@ -20,6 +20,13 @@ int cvi_board_init(void)
 	/* Set RTC / power defaults before remapping the wakeup pads to GPIOs. */
 	set_rtc_register_for_power();
 
+	/* PWR_WAKEUP0 defaults to an internal pull-down (87 kOhm). This pad
+	 * drives the active-low OV9281 XSHUTDOWN signal, so use a pull-up to
+	 * keep the camera out of shutdown while GPIO6 is being initialized.
+	 */
+	mmio_write_32(0x05027018,
+		(mmio_read_32(0x05027018) & ~(1U << 3)) | (1U << 2));
+
 	/* TF socket: SD0, 3.3 V signalling, no connected card-detect switch. */
 	PINMUX_CONFIG(SD0_CLK, SDIO0_CLK);
 	PINMUX_CONFIG(SD0_CMD, SDIO0_CMD);

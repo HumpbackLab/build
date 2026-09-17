@@ -43,6 +43,5 @@
 
 &mipi_rx {
 	/* Camera 0 / Camera 1 XSHUTDOWN, on PWR_WAKEUP0 / PWR_BUTTON1. */
-	snsr-reset = <&porte 6 GPIO_ACTIVE_LOW>, <&porte 8 GPIO_ACTIVE_LOW>,
-		     <&porte 6 GPIO_ACTIVE_LOW>;
+	snsr-reset = <&porte 6 GPIO_ACTIVE_LOW>, <&porte 8 GPIO_ACTIVE_LOW>;
 };
