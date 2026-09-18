@@ -178,6 +178,7 @@ def main():
         rootfs_fs = temp / "rootfs.ext4"
         data_fs = temp / "data.ext4"
         staged_rootfs = temp / "rootfs"
+        staged_data = temp / "data"
 
         boot_fs.touch()
         boot_fs.open("r+b").truncate(parts[0]["size_bytes"])
@@ -190,6 +191,9 @@ def main():
         mount_script.write_text(DATA_MOUNT_SCRIPT)
         mount_script.chmod(0o755)
 
+        shutil.copytree(data_dir, staged_data, symlinks=True)
+        shutil.copy2(BOARD_DIR / "sensor_cfg.ini", staged_data / "sensor_cfg.ini")
+
         rootfs_size_mib = parts[1]["size_bytes"] // (1024 * 1024)
         data_size_mib = parts[2]["size_bytes"] // (1024 * 1024)
         run(
@@ -199,7 +203,7 @@ def main():
         repair_ext4(rootfs_fs)
         run(
             make_ext4fs, "-l", f"{data_size_mib}M", "-L", "DATA",
-            str(data_fs), str(data_dir),
+            str(data_fs), str(staged_data),
         )
         repair_ext4(data_fs)
 
