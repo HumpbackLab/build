@@ -59,3 +59,16 @@
 	/* Camera 0 / Camera 1 XSHUTDOWN, on PWR_WAKEUP0 / PWR_BUTTON1. */
 	snsr-reset = <&porte 6 GPIO_ACTIVE_LOW>, <&porte 8 GPIO_ACTIVE_LOW>;
 };
+
+/* There is no display panel. These reference-board pins are camera FSIN/I2C. */
+&mipi_tx {
+	/delete-property/ reset-gpio;
+	/delete-property/ pwm-gpio;
+	/delete-property/ power-ct-gpio;
+};
+
+&vo {
+	/delete-property/ reset-gpio;
+	/delete-property/ pwm-gpio;
+	/delete-property/ power-ct-gpio;
+};

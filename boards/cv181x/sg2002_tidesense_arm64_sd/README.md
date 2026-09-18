@@ -33,7 +33,7 @@ sync
 
 - SD0：TF 卡 4-bit 总线；不启用 1.8 V UHS。`SD0_CD` 接地，卡座的 `SD0_DET` 没有接入 SoC，因此设备树不使用 GPIO 卡检测，需始终插入启动卡。
 - 摄像头：I2C2 走 `PWR_GPIO1/2`，FSIN 走 `PWR_GPIO0`，两路 XSHUTDOWN 走 `PWR_WAKEUP0` 和 `PWR_BUTTON1`。
-- OV9281：CVITEK sensor adapter 已加入，默认双路为 640×400 RAW10 20fps（全视场子采样），保留 640×400/60fps、640×480/60fps 居中裁切和 1280×800/60fps 模式。上板结果与切换方法见 SDK 根目录 `scripts/ov9281/README.md`。编译启用 `CONFIG_SENSOR_OV_OV9281=y`。SDK sample 从 `/mnt/data/sensor_cfg.ini` 读取双目配置；本目录的 `sensor_cfg.ini` 由整卡镜像脚本写入 DATA 分区根目录，也可复制到已运行设备的 `/mnt/data/sensor_cfg.ini`。左侧 U4 的 7-bit I²C 地址为 `0x10`（配置写十进制 `16`），右侧 U12 为 `0x60`（十进制 `96`）。CVITEK 的 `lane_id` 顺序为 CLK/D0/D1/D2/D3：左侧 RX0 使用 `0,1,2,-1,-1`（2 lane），右侧 RX1 使用 `3,4,-1,-1,-1`（1 lane）。适配层按各路 RX 配置选择传感器输出 lane 数，详情见 [OV9281 双目配置核查](OV9281-lanes.md)；`hw_sync=1` 会设置 OV9281 外部 VSYNC 输入，实际 FSIN 脉冲需与所选帧率一致（默认 20 Hz，60fps 配置为 60 Hz）。
+- OV9281：CVITEK sensor adapter 已加入，默认双路为 640×400 RAW10 20fps（全视场子采样），保留 640×400/60fps、640×480/60fps 居中裁切和 1280×800/60fps 模式。上板结果与切换方法见 SDK 根目录 `scripts/ov9281/README.md`。编译启用 `CONFIG_SENSOR_OV_OV9281=y`。SDK sample 从 `/mnt/data/sensor_cfg.ini` 读取双目配置；本目录的 `sensor_cfg.ini` 由整卡镜像脚本写入 DATA 分区根目录，也可复制到已运行设备的 `/mnt/data/sensor_cfg.ini`。左侧 U4 的 7-bit I²C 地址为 `0x10`（配置写十进制 `16`），右侧 U12 为 `0x60`（十进制 `96`）。CVITEK 的 `lane_id` 顺序为 CLK/D0/D1/D2/D3：左侧 RX0 使用 `0,1,2,-1,-1`（2 lane），右侧 RX1 使用 `3,4,-1,-1,-1`（1 lane）。适配层按各路 RX 配置选择传感器输出 lane 数，详情见 [OV9281 双目配置核查](OV9281-lanes.md)；`hw_sync=1` 启用 OV9281 单帧快照触发，由 PWR_GPIO0 复用 PWM8 向两颗相机输出 20Hz 脉冲；无脉冲不出图。触发模式内部 VTS=910、曝光上限 546 行；自由运行的 20fps 模式仍为 VTS=2730。整卡镜像打包 `/mnt/data/ov9281-update/fsin.sh`，具体启动顺序和验证见 SDK 根目录 `scripts/ov9281/README.md`。
 - USB RNDIS：启动时在 USB1 Type-C 上启用 USB gadget 网卡，设备端地址固定为 `192.168.123.99/24`。主机设置为 `192.168.123.x/24`，例如 `192.168.123.100/24`。启用项为 `CONFIG_TARGET_PACKAGE_RNDIS_SCRIPT=y`。
 - IMU：SPI2 走 `SD1_D3/D0/CMD/CLK`，中断走 `SD1_D1`；未连接的 `SD1_D2` 保持为 GPIO。
 - perf：已启用 A53 PMU 硬件计数器和采样支持；运行 SDK 根目录的 `scripts/perf/build.sh` 构建工具，详见 `scripts/perf/README.md`。更换此内核时须同时更新匹配的内核与厂商 `.ko` 模块。
@@ -42,6 +42,6 @@ sync
 ## 尚需按实物确认
 
 - `pin.md` 未给出 DRAM 容量。当前 `memmap.py` 沿用 SDK SG2002 ARM64 参考板的 256 MiB 地址布局；如果 TideSense 实物 DRAM 容量不同，必须同步修改此内存图及 DDR 初始化配置。
-- ISP tuning 仍使用 SDK 默认值；产品成像质量需要后续标定。共享 FSIN 的双路同步配置已接入 CVITEK `hw_sync` 开关，但脉冲极性、相位和上板同步效果仍需实测。
+- ISP tuning 仍使用 SDK 默认值；产品成像质量需要后续标定。共享 FSIN 已上板验证 20Hz 一脉冲两路各一帧和停脉冲停出图；曝光同步精度仍需示波器等独立测量。
 - SC7U22：已添加 SPI2 子设备及 spidev 支持，SDK 根目录的 `scripts/sc7u22/run.sh` 可进行用户态六轴/FIFO 测试。1 MHz 与 5 MHz 的上板测试通过，10 MHz 出现异常数据，默认使用 1 MHz；尚未接入正式 IIO 驱动或验证 IMU 中断。
 - 原理图中 USB_VBUS_DET 固定接 1.8 V；板级初始化不把该脚改作 GPIO。`pin.md` 还标明 Type-C 的 CC1/CC2 未连接；请确认板上有适合设备模式的 Rd 电阻。否则 Type-C 对 Type-C 连接可能无法完成 attach，需用实际线缆验证。

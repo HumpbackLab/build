@@ -193,6 +193,9 @@ def main():
 
         shutil.copytree(data_dir, staged_data, symlinks=True)
         shutil.copy2(BOARD_DIR / "sensor_cfg.ini", staged_data / "sensor_cfg.ini")
+        fsin_dir = staged_data / "ov9281-update"
+        fsin_dir.mkdir(exist_ok=True)
+        shutil.copy2(REPO_DIR / "scripts/ov9281/fsin.sh", fsin_dir / "fsin.sh")
 
         rootfs_size_mib = parts[1]["size_bytes"] // (1024 * 1024)
         data_size_mib = parts[2]["size_bytes"] // (1024 * 1024)

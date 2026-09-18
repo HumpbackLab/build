@@ -22,3 +22,10 @@ if [ ! -f "$RNDIS_INIT" ]; then
 	exit 1
 fi
 sed -i 's/ifconfig usb0 169\.254\.250\.73/ifconfig usb0 192.168.123.99 netmask 255.255.255.0/' "$RNDIS_INIT"
+
+# Also support existing boot images whose reference DT still assigns FSIN/I2C
+# to a nonexistent display panel. Do not let mipi_tx claim those GPIOs.
+KO_LOADER="$SYSTEM_DIR/mnt/system/ko/loadsystemko.sh"
+if [ -f "$KO_LOADER" ]; then
+	sed -i 's@^insmod /mnt/system/ko/cv181x_mipi_tx.ko.*@insmod /mnt/system/ko/cv181x_mipi_tx.ko gpio=-1,0,-1,0,-1,0@' "$KO_LOADER"
+fi
