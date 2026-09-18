@@ -18,6 +18,8 @@ python3 build/boards/cv181x/sg2002_tidesense_arm64_sd/make_sdcard_image.py
 
 镜像路径为 `install/soc_sg2002_tidesense_arm64_sd/tidesense-sdcard.img`。脚本按 `partition_sd.xml` 创建 MBR 和 BOOT/ROOTFS/DATA 三个分区：BOOT 是 FAT32，内含 `fip.bin` 和 `boot.sd`；ROOTFS 是 ext4，卷标为小写 `rootfs` 以匹配 initramfs 的挂载脚本；DATA 是 ext4，并在系统启动时挂载到 `/mnt/data`。
 
+首次启动会自动将 DATA 分区及 ext4 文件系统扩展至 SD 卡末尾，ROOTFS 保持 200 MiB。镜像生成时会自动构建所需的静态扩容工具（首次需要联网下载 e2fsprogs）；详见 SDK 根目录 `scripts/sd-grow/README.md`。
+
 在 Linux 上先用 `lsblk` 确认 SD 卡对应的整盘设备，然后写入整张卡（下面的 `/dev/sdX` 必须替换成实际设备，例如 `/dev/sdb`，不能写成分区 `/dev/sdb1`）：
 
 ```sh

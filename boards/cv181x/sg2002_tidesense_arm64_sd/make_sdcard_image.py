@@ -30,6 +30,7 @@ case "$1" in
       n=$((n + 1))
     done
     if [ -b /dev/mmcblk0p3 ]; then
+      /sbin/auto-grow-data || echo "TideSense DATA expansion failed; retry next boot"
       mount -t ext4 -o sync /dev/mmcblk0p3 /mnt/data
     else
       echo "TideSense DATA partition /dev/mmcblk0p3 is unavailable"
@@ -172,6 +173,7 @@ def main():
     )
 
     output.parent.mkdir(parents=True, exist_ok=True)
+    run("bash", str(REPO_DIR / "scripts/sd-grow/build.sh"))
     with tempfile.TemporaryDirectory(prefix="tidesense-sd-") as temp_name:
         temp = Path(temp_name)
         boot_fs = temp / "boot.fat"
@@ -187,6 +189,15 @@ def main():
         run(mcopy, "-o", "-i", str(boot_fs), str(boot), "::/boot.sd")
 
         shutil.copytree(rootfs_dir, staged_rootfs, symlinks=True)
+        for name in ("tidesense-grow-data", "resize2fs", "e2fsck"):
+            shutil.copy2(REPO_DIR / "install/tidesense-grow" / name,
+                         staged_rootfs / "sbin" / name)
+        shutil.copy2(REPO_DIR / "scripts/sd-grow/auto-grow-data",
+                     staged_rootfs / "sbin/auto-grow-data")
+        license_dir = staged_rootfs / "usr/share/licenses/e2fsprogs"
+        license_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(REPO_DIR / "install/tidesense-grow/e2fsprogs-1.47.2/NOTICE",
+                     license_dir / "NOTICE")
         mount_script = staged_rootfs / "etc" / "init.d" / "S10auto_mount"
         mount_script.write_text(DATA_MOUNT_SCRIPT)
         mount_script.chmod(0o755)
