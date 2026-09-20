@@ -45,7 +45,10 @@
 	imu@0 {
 		compatible = "silan,sc7u22";
 		reg = <0>;
-		spi-max-frequency = <10000000>;
+		spi-max-frequency = <1000000>;
+		/* SC7U22 INT1 -> SD1_D1 / PWR_GPIO20, active high. */
+		interrupt-parent = <&porte>;
+		interrupts = <20 IRQ_TYPE_EDGE_RISING>;
 		spi-cpol;
 		spi-cpha;
 	};
@@ -71,4 +74,10 @@
 	/delete-property/ reset-gpio;
 	/delete-property/ pwm-gpio;
 	/delete-property/ power-ct-gpio;
+};
+
+&porte {
+	/* GPIO interrupt specifiers contain pin number and IRQ trigger flags. */
+	#interrupt-cells = <2>;
+	interrupt-parent = <&gic>;
 };
