@@ -81,3 +81,10 @@
 	#interrupt-cells = <2>;
 	interrupt-parent = <&gic>;
 };
+
+/* Match the A53-only 1 GHz FSBL setting; retain thermal throttling. */
+&cv181x_cooling {
+	dev-freqs = <1000000000 700000000>,
+		<500000000 375000000>,
+		<500000000 300000000>;
+};
