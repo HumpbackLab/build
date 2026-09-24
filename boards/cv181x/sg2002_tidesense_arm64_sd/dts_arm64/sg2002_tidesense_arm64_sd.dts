@@ -49,6 +49,9 @@
 		/* SC7U22 INT1 -> SD1_D1 / PWR_GPIO20, active high. */
 		interrupt-parent = <&porte>;
 		interrupts = <20 IRQ_TYPE_EDGE_RISING>;
+		/* Shared camera trigger: every 10 INT1 edges, 100 us high. */
+		fsin-gpios = <&porte 0 GPIO_ACTIVE_HIGH>;
+		silan,fsin-pinmux = <0x030010a4 0x7 0x0>;
 		spi-cpol;
 		spi-cpha;
 	};
