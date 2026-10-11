@@ -31,7 +31,8 @@ case "$1" in
     done
     if [ -b /dev/mmcblk0p3 ]; then
       /sbin/auto-grow-data || echo "TideSense DATA expansion failed; retry next boot"
-      mount -t ext4 -o sync /dev/mmcblk0p3 /mnt/data
+      # Buffered writes keep VIO logging from blocking on every SD write.
+      mount -t ext4 -o rw,async /dev/mmcblk0p3 /mnt/data
     else
       echo "TideSense DATA partition /dev/mmcblk0p3 is unavailable"
     fi
