@@ -590,6 +590,28 @@ function prepare_git_hook()
    fi
 }
 
+function build_tidesense_apps()
+{(
+  if [[ "$PROJECT_FULLNAME" != "sg2002_tidesense_arm64_sd" ]]; then
+    echo "build_tidesense_apps requires defconfig sg2002_tidesense_arm64_sd" >&2
+    return 1
+  fi
+  # Use the validated A53 optimization profile for the shipping image.
+  export SCHUR_WITH_MICRO_ROS=ON
+  export SCHUR_OPT_HALFSAMPLE_NEON=${SCHUR_OPT_HALFSAMPLE_NEON:-ON}
+  export SCHUR_OPT_ZMSSD_NEON=${SCHUR_OPT_ZMSSD_NEON:-ON}
+  export SCHUR_OPT_FAST10_NEON=${SCHUR_OPT_FAST10_NEON:-ON}
+  export SCHUR_OPT_ALIGN2D_NEON=${SCHUR_OPT_ALIGN2D_NEON:-ON}
+  export SCHUR_OPT_ALIGN2D_HESSIAN_NEON=${SCHUR_OPT_ALIGN2D_HESSIAN_NEON:-ON}
+  export SCHUR_OPT_WARP_AFFINE_NEON=${SCHUR_OPT_WARP_AFFINE_NEON:-ON}
+  export SCHUR_OPT_WARP_TAIL2=${SCHUR_OPT_WARP_TAIL2:-ON}
+  "$TOP_DIR/scripts/schurvins/build.sh" || return $?
+  "$TOP_DIR/scripts/dataset/build.sh" || return $?
+  "$TOP_DIR/scripts/perf/build.sh" || return $?
+  python3 "$TOP_DIR/build/boards/cv181x/sg2002_tidesense_arm64_sd/install_apps.py" \
+    --install-dir "$OUTPUT_DIR" || return $?
+)}
+
 # shellcheck disable=SC2120
 function build_all()
 {(
@@ -608,6 +630,9 @@ function build_all()
       build_tdl_sdk || return $?
     fi
     build_pqtool_server || return $?
+  fi
+  if [[ "$PROJECT_FULLNAME" == "sg2002_tidesense_arm64_sd" ]]; then
+    build_tidesense_apps || return $?
   fi
   pack_cfg || return $?
   pack_rootfs || return $?

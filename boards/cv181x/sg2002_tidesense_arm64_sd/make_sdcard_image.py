@@ -11,6 +11,8 @@ import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+from install_apps import install_apps, validate_apps
+
 
 BOARD_DIR = Path(__file__).resolve().parent
 REPO_DIR = BOARD_DIR.parents[3]
@@ -156,6 +158,8 @@ def main():
     for required in (rootfs_dir, data_dir, fip, boot):
         if not required.exists():
             raise FileNotFoundError(f"Build output is missing: {required}")
+    # Repacking must not silently produce a system without the VIO/recorder.
+    validate_apps(install_dir)
 
     parts = read_partitions()
     # Calculate aligned offsets before constructing the MBR.
@@ -204,6 +208,7 @@ def main():
         mount_script.chmod(0o755)
 
         shutil.copytree(data_dir, staged_data, symlinks=True)
+        install_apps(install_dir, staged_data, staged_rootfs)
         shutil.copy2(BOARD_DIR / "sensor_cfg.ini", staged_data / "sensor_cfg.ini")
         fsin_dir = staged_data / "ov9281-update"
         fsin_dir.mkdir(exist_ok=True)

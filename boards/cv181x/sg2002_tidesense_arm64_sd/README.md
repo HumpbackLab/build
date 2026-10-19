@@ -16,6 +16,27 @@ build_all
 python3 build/boards/cv181x/sg2002_tidesense_arm64_sd/make_sdcard_image.py
 ```
 
+默认构建包含 SchurVINS（强制 `SCHUR_WITH_MICRO_ROS=ON`）、独立 dataset 录制程序及 perf。
+仅更新应用并重新制作整卡镜像，可在已有 SDK 构建产物的基础上执行：
+
+```sh
+source build/envsetup_soc.sh
+defconfig sg2002_tidesense_arm64_sd
+build_tidesense_apps
+python3 build/boards/cv181x/sg2002_tidesense_arm64_sd/make_sdcard_image.py
+```
+
+应用安装到 `/mnt/data/schurvins-gcc11-static-micro-ros/`、`/mnt/data/tidesense-dataset/`
+和 `/mnt/data/perf/`；系统命令为 `/usr/bin/perf`。`build_tidesense_apps` 会更新
+`install/soc_sg2002_tidesense_arm64_sd/data/` 和 `rootfs/`，随后 `build_all` 将它们打包进分区和升级包。
+单独制作整卡镜像时也会从应用产物刷新这三个目录，并校验 SchurVINS 的编译模式、校验和与单级补偿配置；缺件时返回失败。
+
+主机需要 ROS 2 Humble 开发环境、Python venv/PyYAML、Boost 1.74 头文件及
+perf 所需的 flex、bison、gettext 等工具；首次构建需要联网下载依赖。
+默认 A53 配置启用已验证的 NEON 优化，保留各 `SCHUR_OPT_*` 环境变量覆盖。
+micro-ROS 运行时通信仍默认关闭，需设置 Agent 地址后显式启用。
+随包 `schurvins.yaml` 来自当前测试板的 640×400/20 Hz、曝光上限 0.5 ms 配置，使用原始 SI 单级 IMU 补偿；其它板卡需重新标定。
+
 镜像路径为 `install/soc_sg2002_tidesense_arm64_sd/tidesense-sdcard.img`。脚本按 `partition_sd.xml` 创建 MBR 和 BOOT/ROOTFS/DATA 三个分区：BOOT 是 FAT32，内含 `fip.bin` 和 `boot.sd`；ROOTFS 是 ext4，卷标为小写 `rootfs` 以匹配 initramfs 的挂载脚本；DATA 是 ext4，并在系统启动时挂载到 `/mnt/data`。
 
 首次启动会自动将 DATA 分区及 ext4 文件系统扩展至 SD 卡末尾，ROOTFS 保持 200 MiB。镜像生成时会自动构建所需的静态扩容工具（首次需要联网下载 e2fsprogs）；详见 SDK 根目录 `scripts/sd-grow/README.md`。
