@@ -615,6 +615,10 @@ function build_all()
   pack_system || return $?
   copy_tools || return $?
   pack_upgrade || return $?
+  if [[ "$PROJECT_FULLNAME" == "sg2002_tidesense_arm64_sd" ]]; then
+    python3 "$TOP_DIR/build/boards/cv181x/sg2002_tidesense_arm64_sd/make_sdcard_image.py" \
+      --install-dir "$OUTPUT_DIR" || return $?
+  fi
 )}
 
 function clean_all()

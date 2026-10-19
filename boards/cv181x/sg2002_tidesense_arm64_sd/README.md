@@ -10,7 +10,7 @@ build_all
 
 ## 制作并烧录 SD 卡
 
-`build_all` 完成后，生成按三分区布局制作的整卡镜像：
+`build_all` 在编译及升级包打包成功后，会自动生成按三分区布局制作的整卡镜像；镜像生成失败时，`build_all` 也会返回失败。如需单独重新打包，在工程根目录执行：
 
 ```sh
 python3 build/boards/cv181x/sg2002_tidesense_arm64_sd/make_sdcard_image.py
