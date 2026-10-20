@@ -352,7 +352,8 @@ kernel: kernel-build
 	$(call print_target)
 	${Q}echo LOCALVERSION=${LOCALVERSION}
 	$(call copy_Image_action)
-	$(call copy_ko_action, ${KERNEL_PATH}/${KERNEL_OUTPUT_FOLDER}/modules)
+	# Old releases can remain in INSTALL_MOD_PATH; copy only this build's modules.
+	$(call copy_ko_action, ${KERNEL_PATH}/${KERNEL_OUTPUT_FOLDER}/modules/lib/modules/$$(cat ${KERNEL_PATH}/${KERNEL_OUTPUT_FOLDER}/include/config/kernel.release))
 	$(call copy_header_action, ${KERNEL_PATH}/${KERNEL_OUTPUT_FOLDER}/$(ARCH)/usr/include)
 ifeq ($(patsubst "%",%,$(CONFIG_ARCH)),arm64)
 	# Since we will support aarch32 user space even if the kernel is aarch64, install aarch32 headers also

@@ -24,6 +24,13 @@ if [ ! -f "$RNDIS_INIT" ]; then
 	exit 1
 fi
 sed -i 's/ifconfig usb0 169\.254\.250\.73/ifconfig usb0 192.168.123.99 netmask 255.255.255.0/' "$RNDIS_INIT"
+sed -i 's@insmod /mnt/system/ko/dwc2.ko.*@insmod /mnt/system/ko/dwc2.ko gadget_desc_dma=0 || exit 1@' "$RNDIS_INIT"
+
+# Match Windows' inbox RNDIS6 driver in both RNDIS-only and UVC+RNDIS modes.
+USB_SCRIPT="$SYSTEM_DIR/etc/run_usb.sh"
+if ! grep -q '5162001.*sub_compatible_id' "$USB_SCRIPT"; then
+	sed -i '/echo RNDIS .*\/compatible_id/a\    echo 5162001 >$CVI_FUNC/rndis.usb$FUNC_NUM/os_desc/interface.rndis/sub_compatible_id' "$USB_SCRIPT"
+fi
 
 # Also support existing boot images whose reference DT still assigns FSIN/I2C
 # to a nonexistent display panel. Do not let mipi_tx claim those GPIOs.

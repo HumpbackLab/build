@@ -21,6 +21,9 @@ PACKAGES = {
         "bin/tidesense_record", "bin/schurvins_camera", "bin/fsin.sh",
         "bin/prepare-imu.sh", "run.sh",
     ),
+    "tidesense-uvc": (
+        "bin/tidesense_uvc", "run.sh", "sensor_cfg.ini", "decode.py", "README.md", "VALIDATION.md",
+    ),
     "perf": ("perf", "perf-smoke", "tips.txt", "COPYING-GPLV2", "COPYING-LGPLV3"),
 }
 
@@ -93,7 +96,7 @@ def main():
     args = parser.parse_args()
     install_dir = args.install_dir.resolve()
     install_apps(install_dir, install_dir / "data", install_dir / "rootfs")
-    print(f"Installed SchurVINS (micro-ROS), dataset recorder and perf into {install_dir}")
+    print(f"Installed SchurVINS (micro-ROS), dataset recorder, UVC and perf into {install_dir}")
 
 
 if __name__ == "__main__":

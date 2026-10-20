@@ -607,6 +607,7 @@ function build_tidesense_apps()
   export SCHUR_OPT_WARP_TAIL2=${SCHUR_OPT_WARP_TAIL2:-ON}
   "$TOP_DIR/scripts/schurvins/build.sh" || return $?
   "$TOP_DIR/scripts/dataset/build.sh" || return $?
+  "$TOP_DIR/scripts/uvc/build.sh" || return $?
   "$TOP_DIR/scripts/perf/build.sh" || return $?
   python3 "$TOP_DIR/build/boards/cv181x/sg2002_tidesense_arm64_sd/install_apps.py" \
     --install-dir "$OUTPUT_DIR" || return $?
