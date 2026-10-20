@@ -1,0 +1,48 @@
+#!/bin/sh
+# Run before camera applications; SC7U22 and SPI2 are built-in drivers.
+set -eu
+
+case "${1:-start}" in
+    start|restart|reload|status) ;;
+    stop) exit 0 ;;
+    *) echo "Usage: $0 {start|stop|restart|reload|status}" >&2; exit 1 ;;
+esac
+
+fail() { echo "IMU priority: $*" >&2; exit 1; }
+
+# Resolve the Linux SPI bus number from the physical controller, not boot order.
+spi_name=
+for master in /sys/devices/platform/41a0000.spi2/spi_master/spi*; do
+    [ -d "$master" ] || continue
+    [ -z "$spi_name" ] || fail "multiple SPI2 masters"
+    spi_name=${master##*/}
+done
+[ -n "$spi_name" ] || fail "SPI2 master missing"
+
+imu_pid=
+spi_pid=
+for task in /proc/[0-9]*; do
+    name=$(cat "$task/comm" 2>/dev/null) || continue
+    case "$name" in
+        irq/*-sc7u22)
+            [ -z "$imu_pid" ] || fail "multiple SC7U22 IRQ threads"
+            imu_pid=${task##*/}
+            ;;
+        "$spi_name")
+            [ -z "$spi_pid" ] || fail "multiple SPI2 worker threads"
+            spi_pid=${task##*/}
+            ;;
+    esac
+done
+[ -n "$imu_pid" ] || fail "SC7U22 IRQ thread missing"
+[ -n "$spi_pid" ] || fail "SPI2 worker thread missing"
+
+if [ "${1:-start}" != status ]; then
+    # Raise the dependency first so the IRQ thread can finish its SPI reads.
+    chrt -f -p 94 "$spi_pid"
+    chrt -f -p 95 "$imu_pid"
+fi
+echo "IMU IRQ ($imu_pid):"
+chrt -p "$imu_pid"
+echo "SPI2 worker ($spi_pid):"
+chrt -p "$spi_pid"

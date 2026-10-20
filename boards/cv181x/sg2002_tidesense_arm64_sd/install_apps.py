@@ -80,6 +80,11 @@ def install_apps(install_dir, data_dir, rootfs_dir):
     tips_dir = rootfs_dir / "usr/share/doc/perf-tip"
     tips_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(install_dir / "perf/tips.txt", tips_dir / "tips.txt")
+    init_dir = rootfs_dir / "etc/init.d"
+    init_dir.mkdir(parents=True, exist_ok=True)
+    priority_init = init_dir / "S21imu_priority"
+    shutil.copy2(Path(__file__).parent / "rootfs_script/S21imu_priority", priority_init)
+    priority_init.chmod(0o755)
 
 
 def main():

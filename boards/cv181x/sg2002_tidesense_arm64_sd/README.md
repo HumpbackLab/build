@@ -59,6 +59,7 @@ sync
 - OV9281：CVITEK sensor adapter 已加入，默认双路为 640×400 RAW10 20fps（全视场子采样），保留 640×400/60fps、640×480/60fps 居中裁切和 1280×800/60fps 模式。上板结果与切换方法见 SDK 根目录 `scripts/ov9281/README.md`。编译启用 `CONFIG_SENSOR_OV_OV9281=y`。SDK sample 从 `/mnt/data/sensor_cfg.ini` 读取双目配置；本目录的 `sensor_cfg.ini` 由整卡镜像脚本写入 DATA 分区根目录，也可复制到已运行设备的 `/mnt/data/sensor_cfg.ini`。左侧 U4 的 7-bit I²C 地址为 `0x10`（配置写十进制 `16`），右侧 U12 为 `0x60`（十进制 `96`）。CVITEK 的 `lane_id` 顺序为 CLK/D0/D1/D2/D3：左侧 RX0 使用 `0,1,2,-1,-1`（2 lane），右侧 RX1 使用 `3,4,-1,-1,-1`（1 lane）。适配层按各路 RX 配置选择传感器输出 lane 数，详情见 [OV9281 双目配置核查](OV9281-lanes.md)；`hw_sync=1` 启用 OV9281 单帧快照触发，由 PWR_GPIO0 复用 PWM8 向两颗相机输出 20Hz 脉冲；无脉冲不出图。触发模式内部 VTS=910、曝光上限 546 行；自由运行的 20fps 模式仍为 VTS=2730。整卡镜像打包 `/mnt/data/ov9281-update/fsin.sh`，具体启动顺序和验证见 SDK 根目录 `scripts/ov9281/README.md`。
 - USB RNDIS：启动时在 USB1 Type-C 上启用 USB gadget 网卡，设备端地址固定为 `192.168.123.99/24`。主机设置为 `192.168.123.x/24`，例如 `192.168.123.100/24`。启用项为 `CONFIG_TARGET_PACKAGE_RNDIS_SCRIPT=y`。
 - IMU：SPI2 走 `SD1_D3/D0/CMD/CLK`，中断走 `SD1_D1`；未连接的 `SD1_D2` 保持为 GPIO。
+- IMU 调度：`/etc/init.d/S21imu_priority` 每次开机将 SC7U22 IRQ 线程设为 `SCHED_FIFO 95`、物理 SPI2 的工作线程设为 `SCHED_FIFO 94`，高于 ISP/VPSS 的 90。按线程名称和控制器物理路径定位，不固定 PID 或 Linux SPI 总线编号；运行该脚本的 `status` 可检查当前设置。完整 rootfs 构建及应用/整卡镜像打包均安装该脚本。
 - perf：已启用 A53 PMU 硬件计数器和采样支持；运行 SDK 根目录的 `scripts/perf/build.sh` 构建工具，详见 `scripts/perf/README.md`。更换此内核时须同时更新匹配的内核与厂商 `.ko` 模块。
 - 不配置 SPI NOR、SPI NAND、eMMC 或 MTD 闪存。Linux/U-Boot 的通用 SPI 控制器仍保留给 SPI2 IMU 总线。
 

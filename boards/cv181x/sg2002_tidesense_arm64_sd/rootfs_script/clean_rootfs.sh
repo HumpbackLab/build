@@ -1,6 +1,8 @@
 #!/bin/bash
 
 SYSTEM_DIR=$1
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+install -m 0755 "$SCRIPT_DIR/S21imu_priority" "$SYSTEM_DIR/etc/init.d/S21imu_priority"
 rm -rf $SYSTEM_DIR/mnt/system/usr
 rm -rf $SYSTEM_DIR/mnt/system/lib
 rm -rf $SYSTEM_DIR/mnt/system/lib/libsns_gc*
