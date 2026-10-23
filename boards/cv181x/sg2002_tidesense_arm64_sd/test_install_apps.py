@@ -88,7 +88,7 @@ class BuildOrderTests(unittest.TestCase):
     def test_application_build_forces_micro_ros_on_and_orders_dependencies(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            for name in ("schurvins", "dataset", "uvc", "perf"):
+            for name in ("schurvins", "dataset", "uvc", "depth", "perf"):
                 path = root / "scripts" / name / "build.sh"
                 path.parent.mkdir(parents=True)
                 path.write_text(f'#!/bin/sh\necho "{name}:$SCHUR_WITH_MICRO_ROS"\n')
@@ -100,7 +100,7 @@ class BuildOrderTests(unittest.TestCase):
                       'python3() { echo install; }\nbuild_tidesense_apps\n')
             result = subprocess.run(["bash", "-c", script], cwd=REPO, text=True, capture_output=True)
             self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertEqual(result.stdout.splitlines(), ["schurvins:ON", "dataset:ON", "uvc:ON", "perf:ON", "install"])
+            self.assertEqual(result.stdout.splitlines(), ["schurvins:ON", "dataset:ON", "uvc:ON", "depth:ON", "perf:ON", "install"])
 
     def run_build(self, project="sg2002_tidesense_arm64_sd", failure=0):
         steps = ("build_uboot build_kernel build_ramboot build_osdrv build_3rd_party "
