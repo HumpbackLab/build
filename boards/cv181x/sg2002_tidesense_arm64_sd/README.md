@@ -73,3 +73,5 @@ sync
 - ISP tuning 仍使用 SDK 默认值；产品成像质量需要后续标定。共享 FSIN 已上板验证 20Hz 一脉冲两路各一帧和停脉冲停出图；曝光同步精度仍需示波器等独立测量。
 - SC7U22：当前镜像使用 SPI2 IIO 驱动，INT1 硬中断记录单调时钟时间戳，标称 200Hz、SPI 1MHz，并分频触发双目 FSIN。使用应用包内 `./run.sh --imu-test auto 10` 验证，详见 SDK 根目录 `scripts/schurvins/IMU.md`。`scripts/sc7u22/` 为历史 spidev/FIFO 测试，不能在 IIO 采集运行时切换驱动。
 - 原理图中 USB_VBUS_DET 固定接 1.8 V；板级初始化不把该脚改作 GPIO。`pin.md` 还标明 Type-C 的 CC1/CC2 未连接；请确认板上有适合设备模式的 Rd 电阻。否则 Type-C 对 Type-C 连接可能无法完成 attach，需用实际线缆验证。
+
+联合 VIO + TPU 深度模式预装到 `/mnt/data/tidesense-vio-depth/`。使用同一对 640×400 图像运行 SchurVINS，TPU 降采样到 320×200 后匹配，经单个 micro-ROS 客户端输出同时间戳的位姿、深度和 CameraInfo。详细启动和性能验证见 `scripts/vio-depth/README.md`。

@@ -609,6 +609,7 @@ function build_tidesense_apps()
   "$TOP_DIR/scripts/dataset/build.sh" || return $?
   "$TOP_DIR/scripts/uvc/build.sh" || return $?
   "$TOP_DIR/scripts/depth/build.sh" || return $?
+  "$TOP_DIR/scripts/vio-depth/build.sh" || return $?
   "$TOP_DIR/scripts/perf/build.sh" || return $?
   python3 "$TOP_DIR/build/boards/cv181x/sg2002_tidesense_arm64_sd/install_apps.py" \
     --install-dir "$OUTPUT_DIR" || return $?
