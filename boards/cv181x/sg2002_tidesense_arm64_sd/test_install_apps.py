@@ -2,6 +2,7 @@
 """Check image application installation and SDK build ordering without compiling."""
 
 import hashlib
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -9,7 +10,7 @@ from pathlib import Path
 
 import yaml
 
-from install_apps import PACKAGES, SCHUR_PACKAGE, install_apps
+from install_apps import PACKAGES, SCHUR_PACKAGE, VIO_PACKAGES, packages_for_backend, install_apps
 
 
 REPO = Path(__file__).resolve().parents[4]
@@ -83,6 +84,42 @@ class InstallTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "raw_si"):
             self.stage()
 
+    def native_package(self):
+        source = self.root / SCHUR_PACKAGE
+        target = self.root / VIO_PACKAGES["native-dds"]
+        shutil.copytree(source, target)
+        for name in packages_for_backend("native-dds")[target.name]:
+            path = target / name
+            if not path.exists():
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("native runtime\n")
+                path.chmod(0o755)
+        (target / "BUILD-INFO").write_text("SCHUR_ROS_BACKEND=native-dds\nSCHUR_WITH_MICRO_ROS=OFF\nIMU_INPUT_DOMAIN=raw_si\nIMU_INTRINSICS=single_stage\n")
+        paths = [p for p in target.rglob("*") if p.is_file() and p.name != "SHA256SUMS"]
+        (target / "SHA256SUMS").write_text("".join(f"{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(target)}\n" for p in paths))
+        return target
+
+    def test_native_package_selected_without_micro_package(self):
+        target = self.native_package()
+        shutil.rmtree(self.root / SCHUR_PACKAGE)
+        install_apps(self.root, self.root / "data", self.root / "rootfs", "native-dds")
+        self.assertTrue((self.root / "data" / target.name / "lib/librcl.so").is_file())
+        self.assertFalse((self.root / "data" / SCHUR_PACKAGE).exists())
+
+    def test_native_runtime_corruption_rejected_before_copying(self):
+        target = self.native_package()
+        (target / "lib/librcl.so").write_text("modified")
+        with self.assertRaisesRegex(ValueError, "checksum mismatch"):
+            install_apps(self.root, self.root / "data", self.root / "rootfs", "native-dds")
+        self.assertFalse((self.root / "data").exists())
+
+    def test_native_runtime_missing_rejected_before_copying(self):
+        target = self.native_package()
+        (target / "lib/libddsc.so.0").unlink()
+        with self.assertRaises(FileNotFoundError):
+            install_apps(self.root, self.root / "data", self.root / "rootfs", "native-dds")
+        self.assertFalse((self.root / "data").exists())
+
 
 class BuildOrderTests(unittest.TestCase):
     def test_application_build_forces_micro_ros_on_and_orders_dependencies(self):
@@ -101,6 +138,26 @@ class BuildOrderTests(unittest.TestCase):
             result = subprocess.run(["bash", "-c", script], cwd=REPO, text=True, capture_output=True)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(result.stdout.splitlines(), ["schurvins:ON", "dataset:ON", "uvc:ON", "depth:ON", "vio-depth:ON", "perf:ON", "install"])
+
+    def test_native_backend_forwarded_to_vio_and_image_installer(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            for name in ("schurvins", "dataset", "uvc", "depth", "vio-depth", "perf", "schurvins/micro_ros"):
+                path = root / "scripts" / name / "build.sh"
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(f'#!/bin/sh\necho "{name}:$SCHUR_ROS_BACKEND"\n')
+                path.chmod(0o755)
+            script = ('source build/envsetup_soc.sh >/dev/null\n'
+                      f'TOP_DIR={temp}\nOUTPUT_DIR={temp}/install\n'
+                      'PROJECT_FULLNAME=sg2002_tidesense_arm64_sd\n'
+                      'SCHUR_ROS_BACKEND=native-dds\n'
+                      'python3() { echo "install:$*"; }\nbuild_tidesense_apps\n')
+            result = subprocess.run(["bash", "-c", script], cwd=REPO, text=True, capture_output=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            lines = result.stdout.splitlines()
+            self.assertEqual(lines[0], "schurvins:native-dds")
+            self.assertEqual(lines[1], "schurvins/micro_ros:native-dds")
+            self.assertTrue(lines[-1].endswith("--ros-backend native-dds"))
 
     def run_build(self, project="sg2002_tidesense_arm64_sd", failure=0):
         steps = ("build_uboot build_kernel build_ramboot build_osdrv build_3rd_party "

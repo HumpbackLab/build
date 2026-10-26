@@ -597,6 +597,7 @@ function build_tidesense_apps()
     return 1
   fi
   # Use the validated A53 optimization profile for the shipping image.
+  export SCHUR_ROS_BACKEND=${SCHUR_ROS_BACKEND:-micro-ros}
   export SCHUR_WITH_MICRO_ROS=ON
   export SCHUR_OPT_HALFSAMPLE_NEON=${SCHUR_OPT_HALFSAMPLE_NEON:-ON}
   export SCHUR_OPT_ZMSSD_NEON=${SCHUR_OPT_ZMSSD_NEON:-ON}
@@ -606,13 +607,17 @@ function build_tidesense_apps()
   export SCHUR_OPT_WARP_AFFINE_NEON=${SCHUR_OPT_WARP_AFFINE_NEON:-ON}
   export SCHUR_OPT_WARP_TAIL2=${SCHUR_OPT_WARP_TAIL2:-ON}
   "$TOP_DIR/scripts/schurvins/build.sh" || return $?
+  # The separate depth applications retain their own micro-ROS transport.
+  if [[ "$SCHUR_ROS_BACKEND" != micro-ros ]]; then
+    "$TOP_DIR/scripts/schurvins/micro_ros/build.sh" || return $?
+  fi
   "$TOP_DIR/scripts/dataset/build.sh" || return $?
   "$TOP_DIR/scripts/uvc/build.sh" || return $?
   "$TOP_DIR/scripts/depth/build.sh" || return $?
   "$TOP_DIR/scripts/vio-depth/build.sh" || return $?
   "$TOP_DIR/scripts/perf/build.sh" || return $?
   python3 "$TOP_DIR/build/boards/cv181x/sg2002_tidesense_arm64_sd/install_apps.py" \
-    --install-dir "$OUTPUT_DIR" || return $?
+    --install-dir "$OUTPUT_DIR" --ros-backend "$SCHUR_ROS_BACKEND" || return $?
 )}
 
 # shellcheck disable=SC2120
