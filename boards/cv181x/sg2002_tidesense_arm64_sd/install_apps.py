@@ -23,8 +23,7 @@ PACKAGES = {
         "bin/tidesense_uvc", "run.sh", "sensor_cfg.ini", "decode.py", "README.md", "VALIDATION.md",
     ),
     "tidesense-depth": (
-        "bin/tidesense_depth", "bin/schurvins_camera", "bin/fsin.sh", "run.sh",
-        "sensor_cfg.ini", "calibration.yaml", "receive.py", "README.md", "VALIDATION.md",
+        "bin/tidesense_depth", "run.sh", "calibration.yaml", "receive.py", "README.md", "VALIDATION.md",
     ),
     "tidesense-vio-depth": (
         "bin/tidesense_vio_depth", "bin/schurvins_camera", "bin/fsin.sh", "bin/prepare-imu.sh",
