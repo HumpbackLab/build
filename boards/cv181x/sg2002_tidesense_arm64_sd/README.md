@@ -37,7 +37,7 @@ python3 build/boards/cv181x/sg2002_tidesense_arm64_sd/make_sdcard_image.py
 
 主机需要 ROS 2 开发环境、Python venv/PyYAML、Boost 1.74 头文件及
 perf 所需的 flex、bison、gettext 等工具；首次构建需要联网下载依赖。
-默认 A53 配置启用已验证的 NEON 优化，保留各 `SCHUR_OPT_*` 环境变量覆盖。
+SchurVINS 的 `SCHUR_OPT_*` 优化默认值由其构建脚本决定（当前默认开启）；外层构建不设置这些开关。
 micro-ROS 运行时通信仍默认关闭，需设置 Agent 地址后显式启用。
 随包 `schurvins.yaml` 来自当前测试板的 640×400/20 Hz、曝光上限 0.5 ms 配置，使用原始 SI 单级 IMU 补偿；其它板卡需重新标定。
 

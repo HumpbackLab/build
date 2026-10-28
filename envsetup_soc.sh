@@ -596,16 +596,8 @@ function build_tidesense_apps()
     echo "build_tidesense_apps requires defconfig sg2002_tidesense_arm64_sd" >&2
     return 1
   fi
-  # Use the validated A53 optimization profile for the shipping image.
   export SCHUR_ROS_BACKEND=${SCHUR_ROS_BACKEND:-micro-ros}
   export SCHUR_WITH_MICRO_ROS=ON
-  export SCHUR_OPT_HALFSAMPLE_NEON=${SCHUR_OPT_HALFSAMPLE_NEON:-ON}
-  export SCHUR_OPT_ZMSSD_NEON=${SCHUR_OPT_ZMSSD_NEON:-ON}
-  export SCHUR_OPT_FAST10_NEON=${SCHUR_OPT_FAST10_NEON:-ON}
-  export SCHUR_OPT_ALIGN2D_NEON=${SCHUR_OPT_ALIGN2D_NEON:-ON}
-  export SCHUR_OPT_ALIGN2D_HESSIAN_NEON=${SCHUR_OPT_ALIGN2D_HESSIAN_NEON:-ON}
-  export SCHUR_OPT_WARP_AFFINE_NEON=${SCHUR_OPT_WARP_AFFINE_NEON:-ON}
-  export SCHUR_OPT_WARP_TAIL2=${SCHUR_OPT_WARP_TAIL2:-ON}
   "$TOP_DIR/scripts/schurvins/build.sh" || return $?
   # The separate depth applications retain their own micro-ROS transport.
   if [[ "$SCHUR_ROS_BACKEND" != micro-ros ]]; then
