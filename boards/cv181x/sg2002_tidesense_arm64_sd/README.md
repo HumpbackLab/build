@@ -35,7 +35,7 @@ python3 build/boards/cv181x/sg2002_tidesense_arm64_sd/make_sdcard_image.py
 深度模式使用独立启动入口和同步相机所有权锁，micro-ROS 发布毫米深度与 CameraInfo，
 运行及电脑端接收方法见 [深度模式说明](../../../../scripts/depth/README.md)。
 
-主机需要 ROS 2 Humble 开发环境、Python venv/PyYAML、Boost 1.74 头文件及
+主机需要 ROS 2 开发环境、Python venv/PyYAML、Boost 1.74 头文件及
 perf 所需的 flex、bison、gettext 等工具；首次构建需要联网下载依赖。
 默认 A53 配置启用已验证的 NEON 优化，保留各 `SCHUR_OPT_*` 环境变量覆盖。
 micro-ROS 运行时通信仍默认关闭，需设置 Agent 地址后显式启用。
